@@ -19,15 +19,18 @@ jobs:
           outputs: dist/snake.svg
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: snake
           path: dist/snake.svg
 
       - name: Commit and push changes
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}  # Using Personal Access Token
         run: |
           git config --global user.name 'github-actions'
           git config --global user.email 'github-actions@github.com'
+          git remote set-url origin https://x-access-token:${GH_PAT}@github.com/${{ github.repository }}.git
           git add dist/snake.svg
           git commit -m "Updated snake contribution graph"
-          git push
+          git push origin main
