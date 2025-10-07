@@ -1,36 +1,31 @@
-name: Generate Snake Game
+name: Generate Snake
 
 on:
-  schedule:
-    - cron: "0 0 * * *" # Runs daily at midnight UTC
-  workflow_dispatch: # Allows manual runs
+  schedule: # Runs every 12 hours
+    - cron: "0 */12 * * *"
+  workflow_dispatch: # Manual trigger
+  push:
+    branches:
+      - main
 
 jobs:
   generate:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Generate snake game from contributions
-        uses: Platane/snk@v2
+      - name: Generate GitHub contribution grid snake
+        uses: Platane/snk@v3
         with:
-          github_user_name: ${{ github.repository_owner }}
-          outputs: dist/snake.svg
+          github_user_name: Shubham-Master
+          outputs: |
+            dist/pacman-contribution-graph.svg
+            dist/pacman-contribution-graph-dark.svg?palette=github-dark
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - name: Push generated files
+        uses: crazy-max/ghaction-github-pages@v3.1.0
         with:
-          name: snake
-          path: dist/snake.svg
-
-      - name: Commit and push changes
+          target_branch: output
+          build_dir: dist
         env:
-          GH_PAT: ${{ secrets.GH_PAT }} # Using Personal Access Token
-        run: |
-          git config --global user.name 'github-actions'
-          git config --global user.email 'github-actions@github.com'
-          git remote set-url origin https://x-access-token:${GH_PAT}@github.com/${{ github.repository }}.git
-          git add dist/snake.svg
-          git commit -m "Updated snake contribution graph"
-          git push origin main
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
